@@ -7,16 +7,68 @@
 
 	const { dropdownOptions } = data;
 
+	interface Employee {
+		no: string;
+		name: string;
+	}
+	interface Part {
+		no: string;
+		name: string;
+	}
+	interface Vendor {
+		code: string;
+		name: string;
+	}
+
+	// Extract grouped options
+	const employees = (dropdownOptions['Employee'] || []) as unknown as Employee[];
+	const parts = (dropdownOptions['Part'] || []) as unknown as Part[];
+	const vendors = (dropdownOptions['Vendor'] || []) as unknown as Vendor[];
+
 	const categories = {
-		empNo: dropdownOptions['Emp No'] || [],
-		empName: dropdownOptions['Emp Name'] || [],
+		empNo: employees.map((e) => e.no).filter(Boolean),
+		empName: employees.map((e) => e.name).filter(Boolean),
 		projectCode: dropdownOptions['Project Code'] || [],
-		partNumber: dropdownOptions['Part No'] || [],
-		partName: dropdownOptions['Part Name'] || [],
-		supplier: dropdownOptions['Supplier'] || [],
+		partNumber: parts.map((p) => p.no).filter(Boolean),
+		partName: parts.map((p) => p.name).filter(Boolean),
+		supplier: vendors.map((v) => v.name).filter(Boolean),
 		mfgProcess: dropdownOptions['Mfg Process'] || [],
 		typeOfIssue: dropdownOptions['Type of Issue'] || []
 	};
+
+	let selectedEmpNo: string = '';
+	let selectedEmpName: string = '';
+	let selectedPartNo: string = '';
+	let selectedPartName: string = '';
+
+	// Determine who changed to prevent cyclical loops
+	function onEmpNoChange() {
+		if (selectedEmpNo) {
+			const emp = employees.find((e) => e.no === selectedEmpNo);
+			if (emp && selectedEmpName !== emp.name) selectedEmpName = emp.name;
+		}
+	}
+
+	function onEmpNameChange() {
+		if (selectedEmpName) {
+			const emp = employees.find((e) => e.name === selectedEmpName);
+			if (emp && selectedEmpNo !== emp.no) selectedEmpNo = emp.no;
+		}
+	}
+
+	function onPartNoChange() {
+		if (selectedPartNo) {
+			const part = parts.find((p) => p.no === selectedPartNo);
+			if (part && selectedPartName !== part.name) selectedPartName = part.name;
+		}
+	}
+
+	function onPartNameChange() {
+		if (selectedPartName) {
+			const part = parts.find((p) => p.name === selectedPartName);
+			if (part && selectedPartNo !== part.no) selectedPartNo = part.no;
+		}
+	}
 
 	let isSubmitting = false;
 </script>
@@ -85,6 +137,10 @@
 					return async ({ update }) => {
 						isSubmitting = false;
 						update({ reset: true });
+						selectedEmpNo = '';
+						selectedEmpName = '';
+						selectedPartNo = '';
+						selectedPartName = '';
 					};
 				}}
 			>
@@ -98,6 +154,8 @@
 							id="empNo"
 							name="empNo"
 							required
+							bind:value={selectedEmpNo}
+							on:change={onEmpNoChange}
 							class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border"
 						>
 							<option value="" disabled selected>Select Emp No</option>
@@ -115,6 +173,8 @@
 							id="empName"
 							name="empName"
 							required
+							bind:value={selectedEmpName}
+							on:change={onEmpNameChange}
 							class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border"
 						>
 							<option value="" disabled selected>Select Emp Name</option>
@@ -165,6 +225,8 @@
 							id="partNumber"
 							name="partNumber"
 							required
+							bind:value={selectedPartNo}
+							on:change={onPartNoChange}
 							class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border"
 						>
 							<option value="" disabled selected>Select Part No</option>
@@ -180,6 +242,8 @@
 							id="partName"
 							name="partName"
 							required
+							bind:value={selectedPartName}
+							on:change={onPartNameChange}
 							class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border"
 						>
 							<option value="" disabled selected>Select Part Name</option>

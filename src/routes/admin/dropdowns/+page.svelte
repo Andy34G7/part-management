@@ -5,23 +5,46 @@
 	export let data: PageData;
 	export let form: ActionData;
 
-	const categories = [
-		'Emp No',
-		'Emp Name',
-		'Project Code',
-		'Part No',
-		'Part Name',
-		'Supplier',
-		'Mfg Process',
-		'Type of Issue',
-		'Vendor Code',
-		'Vendor Name'
-	];
+	const categories = ['Employee', 'Part', 'Vendor', 'Project Code', 'Mfg Process', 'Type of Issue'];
 
 	let selectedCategory = categories[0];
 	let isSubmitting = false;
 
+	// Form binds
+	let employeeNo = '';
+	let employeeName = '';
+	let partNo = '';
+	let partName = '';
+	let vendorCode = '';
+	let vendorName = '';
+	let simpleValue = '';
+
 	$: optionsList = data.dropdownOptions[selectedCategory] || [];
+
+	function formatDisplayValue(value: string, category: string): string {
+		try {
+			if (category === 'Employee' || category === 'Part' || category === 'Vendor') {
+				const obj = JSON.parse(value);
+				if (category === 'Employee') return `${obj.no} - ${obj.name}`;
+				if (category === 'Part') return `${obj.no} - ${obj.name}`;
+				if (category === 'Vendor') return `${obj.code} - ${obj.name}`;
+			}
+		} catch (e) {
+			// Fallback to raw value if it's not valid JSON
+		}
+		return value;
+	}
+
+	function getSubmitValue() {
+		if (selectedCategory === 'Employee') {
+			return JSON.stringify({ no: employeeNo, name: employeeName });
+		} else if (selectedCategory === 'Part') {
+			return JSON.stringify({ no: partNo, name: partName });
+		} else if (selectedCategory === 'Vendor') {
+			return JSON.stringify({ code: vendorCode, name: vendorName });
+		}
+		return simpleValue;
+	}
 </script>
 
 <div class="px-8 py-10 max-w-5xl mx-auto">
@@ -68,33 +91,120 @@
 				<form
 					method="POST"
 					action="?/addOption"
-					use:enhance={() => {
+					use:enhance={({ formData }) => {
 						isSubmitting = true;
+						formData.set('value', getSubmitValue());
 						return async ({ update }) => {
 							isSubmitting = false;
 							update({ reset: true });
+							// Reset local binds
+							employeeNo = '';
+							employeeName = '';
+							partNo = '';
+							partName = '';
+							vendorCode = '';
+							vendorName = '';
+							simpleValue = '';
 						};
 					}}
 					class="space-y-4"
 				>
 					<input type="hidden" name="category" value={selectedCategory} />
-					<div>
-						<label for="newValue" class="block text-sm font-medium text-gray-700 sr-only"
-							>Value</label
-						>
-						<input
-							type="text"
-							name="value"
-							id="newValue"
-							placeholder={`Enter new ${selectedCategory.toLowerCase()}`}
-							required
-							class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border"
-						/>
-					</div>
+
+					{#if selectedCategory === 'Employee'}
+						<div>
+							<label for="employeeNo" class="block text-sm font-medium text-gray-700 mb-1"
+								>Employee Number</label
+							>
+							<input
+								type="text"
+								id="employeeNo"
+								bind:value={employeeNo}
+								required
+								class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border"
+							/>
+						</div>
+						<div>
+							<label for="employeeName" class="block text-sm font-medium text-gray-700 mb-1"
+								>Employee Name</label
+							>
+							<input
+								type="text"
+								id="employeeName"
+								bind:value={employeeName}
+								required
+								class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border"
+							/>
+						</div>
+					{:else if selectedCategory === 'Part'}
+						<div>
+							<label for="partNo" class="block text-sm font-medium text-gray-700 mb-1"
+								>Part Number</label
+							>
+							<input
+								type="text"
+								id="partNo"
+								bind:value={partNo}
+								required
+								class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border"
+							/>
+						</div>
+						<div>
+							<label for="partName" class="block text-sm font-medium text-gray-700 mb-1"
+								>Part Name</label
+							>
+							<input
+								type="text"
+								id="partName"
+								bind:value={partName}
+								required
+								class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border"
+							/>
+						</div>
+					{:else if selectedCategory === 'Vendor'}
+						<div>
+							<label for="vendorCode" class="block text-sm font-medium text-gray-700 mb-1"
+								>Vendor Code</label
+							>
+							<input
+								type="text"
+								id="vendorCode"
+								bind:value={vendorCode}
+								required
+								class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border"
+							/>
+						</div>
+						<div>
+							<label for="vendorName" class="block text-sm font-medium text-gray-700 mb-1"
+								>Vendor Name</label
+							>
+							<input
+								type="text"
+								id="vendorName"
+								bind:value={vendorName}
+								required
+								class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border"
+							/>
+						</div>
+					{:else}
+						<div>
+							<label for="simpleValue" class="block text-sm font-medium text-gray-700 mb-1"
+								>Value</label
+							>
+							<input
+								type="text"
+								id="simpleValue"
+								bind:value={simpleValue}
+								required
+								class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2 px-3 border"
+							/>
+						</div>
+					{/if}
+
 					<button
 						type="submit"
 						disabled={isSubmitting}
-						class="w-full inline-flex justify-center flex-shrink-0 py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+						class="w-full inline-flex justify-center flex-shrink-0 py-2 px-4 mt-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
 					>
 						{isSubmitting ? 'Adding...' : 'Add Option'}
 					</button>
@@ -119,7 +229,9 @@
 					<ul class="divide-y divide-gray-200 max-h-[600px] overflow-y-auto">
 						{#each optionsList as option}
 							<li class="px-6 py-4 flex items-center justify-between hover:bg-gray-50">
-								<span class="text-sm font-medium text-gray-900">{option.value}</span>
+								<span class="text-sm font-medium text-gray-900"
+									>{formatDisplayValue(option.value, selectedCategory)}</span
+								>
 								<form method="POST" action="?/deleteOption" use:enhance>
 									<input type="hidden" name="id" value={option.id} />
 									<button

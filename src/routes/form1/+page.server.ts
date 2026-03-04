@@ -7,9 +7,19 @@ export const load: PageServerLoad = async () => {
 
     const optionsByCategory = allOptions.reduce((acc, current) => {
         if (!acc[current.category]) acc[current.category] = [];
-        acc[current.category].push(current.value);
+
+        let parsedValue = current.value;
+        try {
+            if (['Employee', 'Part', 'Vendor'].includes(current.category)) {
+                parsedValue = JSON.parse(current.value);
+            }
+        } catch (e) {
+            // keep as string if not valid JSON
+        }
+
+        acc[current.category].push(parsedValue);
         return acc;
-    }, {} as Record<string, string[]>);
+    }, {} as Record<string, any[]>);
 
     return {
         dropdownOptions: optionsByCategory

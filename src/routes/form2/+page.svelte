@@ -7,10 +7,24 @@
 
 	const { dropdownOptions } = data;
 
+	interface Part {
+		no: string;
+		name: string;
+	}
+	interface Vendor {
+		code: string;
+		name: string;
+	}
+
+	const parts = (dropdownOptions['Part'] || []) as unknown as Part[];
+	const vendors = (dropdownOptions['Vendor'] || []) as unknown as Vendor[];
+
 	const categories = {
 		projectCode: dropdownOptions['Project Code'] || [],
-		vendorCode: dropdownOptions['Vendor Code'] || [],
-		vendorName: dropdownOptions['Vendor Name'] || []
+		partNumber: parts.map((p) => p.no).filter(Boolean),
+		partName: parts.map((p) => p.name).filter(Boolean),
+		vendorCode: vendors.map((v) => v.code).filter(Boolean),
+		vendorName: vendors.map((v) => v.name).filter(Boolean)
 	};
 
 	let isSubmitting = false;
@@ -24,11 +38,41 @@
 	let vendorCode = '';
 	let vendorName = '';
 
+	function onPartNumberChange() {
+		if (partNumber) {
+			const part = parts.find((p) => p.no === partNumber);
+			if (part && partName !== part.name) partName = part.name;
+		}
+	}
+
+	function onPartNameChange() {
+		if (partName) {
+			const part = parts.find((p) => p.name === partName);
+			if (part && partNumber !== part.no) partNumber = part.no;
+		}
+	}
+
+	function onVendorCodeChange() {
+		if (vendorCode) {
+			const vendor = vendors.find((v) => v.code === vendorCode);
+			if (vendor && vendorName !== vendor.name) vendorName = vendor.name;
+		}
+	}
+
+	function onVendorNameChange() {
+		if (vendorName) {
+			const vendor = vendors.find((v) => v.name === vendorName);
+			if (vendor && vendorCode !== vendor.code) vendorCode = vendor.code;
+		}
+	}
+
 	async function handlePartNumberBlur() {
 		if (!partNumber.trim()) {
 			lookupMessage = '';
 			return;
 		}
+
+		onPartNumberChange(); // Just in case it hasn't triggered yet for autofill
 
 		isLookingUp = true;
 		lookupMessage = 'Looking up part number...';
@@ -126,15 +170,20 @@
 							>Part Number</label
 						>
 						<div class="mt-1">
-							<input
-								type="text"
+							<select
 								name="partNumber"
 								id="partNumber"
 								required
 								bind:value={partNumber}
+								on:change={onPartNumberChange}
 								on:blur={handlePartNumberBlur}
 								class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 border"
-							/>
+							>
+								<option value="" disabled>Select Part No</option>
+								{#each categories.partNumber as opt}
+									<option value={opt}>{opt}</option>
+								{/each}
+							</select>
 						</div>
 
 						{#if lookupMessage}
@@ -148,14 +197,19 @@
 
 					<div>
 						<label for="partName" class="block text-sm font-medium text-gray-700">Part Name</label>
-						<input
-							type="text"
+						<select
 							name="partName"
 							id="partName"
 							required
 							bind:value={partName}
+							on:change={onPartNameChange}
 							class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 border"
-						/>
+						>
+							<option value="" disabled>Select Part Name</option>
+							{#each categories.partName as opt}
+								<option value={opt}>{opt}</option>
+							{/each}
+						</select>
 					</div>
 
 					<div>
@@ -185,6 +239,7 @@
 							name="vendorCode"
 							bind:value={vendorCode}
 							required
+							on:change={onVendorCodeChange}
 							class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 border"
 						>
 							<option value="" disabled>Select Vendor Code</option>
@@ -203,6 +258,7 @@
 							name="vendorName"
 							bind:value={vendorName}
 							required
+							on:change={onVendorNameChange}
 							class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 border"
 						>
 							<option value="" disabled>Select Vendor Name</option>
