@@ -6,7 +6,7 @@
 	<!-- Sidebar -->
 	<aside class="w-64 bg-gray-900 text-white flex flex-col">
 		<div class="h-16 flex items-center px-6 border-b border-gray-800">
-			<h1 class="text-xl font-bold tracking-wider">PMS Admin</h1>
+			<h1 class="text-xl font-bold tracking-wider">Admin</h1>
 		</div>
 		<nav class="flex-1 px-4 py-6 space-y-2">
 			<a

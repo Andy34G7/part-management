@@ -210,6 +210,54 @@
 					</button>
 				</form>
 			</div>
+
+			<!-- Batch Upload Form -->
+			<div class="bg-white p-6 shadow rounded-lg border border-gray-100">
+				<h3 class="text-lg font-medium text-gray-900 mb-2">Batch Upload (CSV)</h3>
+				<p class="text-xs text-gray-500 mb-4">
+					Upload a .csv file for <strong class="text-gray-700">{selectedCategory}</strong>.
+					{#if selectedCategory === 'Employee'}
+						Columns needed: <code>no, name</code>.
+					{:else if selectedCategory === 'Part'}
+						Columns needed: <code>no, name</code>.
+					{:else if selectedCategory === 'Vendor'}
+						Columns needed: <code>code, name</code>.
+					{:else}
+						Columns needed: <code>value</code>.
+					{/if}
+				</p>
+				<form
+					method="POST"
+					action="?/batchUpload"
+					enctype="multipart/form-data"
+					use:enhance={() => {
+						isSubmitting = true;
+						return async ({ update }) => {
+							isSubmitting = false;
+							update();
+						};
+					}}
+					class="space-y-4"
+				>
+					<input type="hidden" name="category" value={selectedCategory} />
+					<div>
+						<input
+							type="file"
+							name="file"
+							accept=".csv"
+							required
+							class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-gray-300 rounded-md"
+						/>
+					</div>
+					<button
+						type="submit"
+						disabled={isSubmitting}
+						class="w-full inline-flex justify-center flex-shrink-0 py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+					>
+						{isSubmitting ? 'Uploading...' : 'Upload CSV'}
+					</button>
+				</form>
+			</div>
 		</div>
 
 		<!-- Right Column: List of existing options -->

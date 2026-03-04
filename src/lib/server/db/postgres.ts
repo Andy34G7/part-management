@@ -32,6 +32,11 @@ export class PostgresDropdownRepository implements IDropdownRepository {
         return result;
     }
 
+    async addOptions(options: NewDropdownOption[]): Promise<DropdownOption[]> {
+        if (options.length === 0) return [];
+        return await db.insert(schema.dropdownOptions).values(options).returning();
+    }
+
     async deleteOption(id: number): Promise<void> {
         await db.delete(schema.dropdownOptions).where(eq(schema.dropdownOptions.id, id));
     }
@@ -46,6 +51,11 @@ export class PostgresForm1Repository implements IForm1Repository {
         const [result] = await db.insert(schema.form1Submissions).values(submission).returning();
         return result;
     }
+
+    async createSubmissions(submissions: NewForm1Submission[]): Promise<Form1Submission[]> {
+        if (submissions.length === 0) return [];
+        return await db.insert(schema.form1Submissions).values(submissions).returning();
+    }
 }
 
 export class PostgresForm2Repository implements IForm2Repository {
@@ -56,6 +66,11 @@ export class PostgresForm2Repository implements IForm2Repository {
     async createSubmission(submission: NewForm2Submission): Promise<Form2Submission> {
         const [result] = await db.insert(schema.form2Submissions).values(submission).returning();
         return result;
+    }
+
+    async createSubmissions(submissions: NewForm2Submission[]): Promise<Form2Submission[]> {
+        if (submissions.length === 0) return [];
+        return await db.insert(schema.form2Submissions).values(submissions).returning();
     }
 
     async getPartDetailsByNumber(partNumber: string): Promise<Form2Submission | null> {

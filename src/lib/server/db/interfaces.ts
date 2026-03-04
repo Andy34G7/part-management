@@ -45,16 +45,19 @@ export type NewForm2Submission = Omit<Form2Submission, 'id' | 'createdAt'>;
 export interface IDropdownRepository {
     getOptions(category?: string): Promise<DropdownOption[]>;
     addOption(option: NewDropdownOption): Promise<DropdownOption>;
+    addOptions(options: NewDropdownOption[]): Promise<DropdownOption[]>;
     deleteOption(id: number): Promise<void>;
 }
 
 export interface IForm1Repository {
     getSubmissions(): Promise<Form1Submission[]>;
     createSubmission(submission: NewForm1Submission): Promise<Form1Submission>;
+    createSubmissions(submissions: NewForm1Submission[]): Promise<Form1Submission[]>;
 }
 
 export interface IForm2Repository {
     getSubmissions(): Promise<Form2Submission[]>;
     createSubmission(submission: NewForm2Submission): Promise<Form2Submission>;
+    createSubmissions(submissions: NewForm2Submission[]): Promise<Form2Submission[]>;
     getPartDetailsByNumber(partNumber: string): Promise<Form2Submission | null>;
 }

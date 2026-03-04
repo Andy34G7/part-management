@@ -1,6 +1,16 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import type { PageData, ActionData } from './$types';
 	import { onMount } from 'svelte';
+
+	interface CustomActionData {
+		importError?: string;
+		importSuccess?: string;
+	}
+
+	export let form: CustomActionData;
+
+	let form1El: HTMLFormElement;
+	let form2El: HTMLFormElement;
 
 	// Need to dynamically import Chart to avoid SSR issues
 	import {
@@ -152,21 +162,76 @@
 			<h1 class="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
 			<p class="mt-2 text-sm text-gray-600">Analytics and recent submissions across forms.</p>
 		</div>
-		<div class="flex gap-3">
+		<div class="grid grid-cols-2 gap-3 mt-4 md:mt-0">
+			<form
+				action="?/importForm1"
+				method="POST"
+				enctype="multipart/form-data"
+				class="flex"
+				bind:this={form1El}
+			>
+				<label
+					for="file-form1"
+					class="cursor-pointer w-full justify-center inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
+				>
+					<span>Import Form 1</span>
+					<input
+						id="file-form1"
+						name="file"
+						type="file"
+						accept=".csv"
+						class="sr-only"
+						on:change={() => form1El?.submit()}
+					/>
+				</label>
+			</form>
 			<a
 				href="/api/export?type=form1"
-				class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+				class="inline-flex justify-center items-center px-4 py-2 border border-blue-600 shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
 			>
-				Export Form 1 (CSV)
+				Export Form 1
 			</a>
+			<form
+				action="?/importForm2"
+				method="POST"
+				enctype="multipart/form-data"
+				class="flex"
+				bind:this={form2El}
+			>
+				<label
+					for="file-form2"
+					class="cursor-pointer w-full justify-center inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
+				>
+					<span>Import Form 2</span>
+					<input
+						id="file-form2"
+						name="file"
+						type="file"
+						accept=".csv"
+						class="sr-only"
+						on:change={() => form2El?.submit()}
+					/>
+				</label>
+			</form>
 			<a
 				href="/api/export?type=form2"
-				class="inline-flex items-center px-4 py-2 border border-blue-600 shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+				class="inline-flex justify-center items-center px-4 py-2 border border-blue-600 shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
 			>
-				Export Form 2 (CSV)
+				Export Form 2
 			</a>
 		</div>
 	</div>
+
+	{#if form?.importError}
+		<div class="rounded-md bg-red-50 p-4 border border-red-200 text-red-700 text-sm">
+			{form.importError}
+		</div>
+	{/if}
+	{#if form?.importSuccess}
+		<div class="rounded-md bg-green-50 p-4 border border-green-200 text-green-700 text-sm">
+			{form.importSuccess}
+		</div>
+	{/if}
 
 	<!-- Stat Cards -->
 	<div class="grid grid-cols-1 md:grid-cols-2 gap-6">

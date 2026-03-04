@@ -28,7 +28,9 @@
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.9.0",
+    "@types/papaparse": "^5.5.2",
     "chart.js": "^4.5.1",
-    "drizzle-orm": "^0.45.1"
+    "drizzle-orm": "^0.45.1",
+    "papaparse": "^5.5.3"
   }
 }
