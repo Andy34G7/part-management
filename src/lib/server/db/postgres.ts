@@ -14,6 +14,9 @@ import type {
     NewForm1Submission,
     Form2Submission,
     NewForm2Submission,
+    IBelbinRepository,
+    BelbinSubmission,
+    NewBelbinSubmission,
 } from './interfaces';
 
 const sql = neon(env.DATABASE_URL);
@@ -82,5 +85,16 @@ export class PostgresForm2Repository implements IForm2Repository {
             .limit(1);
 
         return result || null;
+    }
+}
+
+export class PostgresBelbinRepository implements IBelbinRepository {
+    async getSubmissions(): Promise<BelbinSubmission[]> {
+        return await db.select().from(schema.belbinSubmissions).orderBy(desc(schema.belbinSubmissions.createdAt));
+    }
+
+    async createSubmission(submission: NewBelbinSubmission): Promise<BelbinSubmission> {
+        const [result] = await db.insert(schema.belbinSubmissions).values(submission).returning();
+        return result;
     }
 }

@@ -1,4 +1,4 @@
-import { pgTable, text, serial, date, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, text, serial, date, timestamp, integer } from 'drizzle-orm/pg-core';
 
 export const dropdownOptions = pgTable('dropdown_options', {
     id: serial('id').primaryKey(),
@@ -35,5 +35,21 @@ export const form2Submissions = pgTable('form2_submissions', {
     vendorName: text('vendor_name').notNull(),
     applicability: text('applicability').notNull(),
     dhrProject: text('dhr_project').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const belbinSubmissions = pgTable('belbin_submissions', {
+    id: serial('id').primaryKey(),
+    empNo: text('emp_no').notNull(),
+    empName: text('emp_name').notNull(),
+    im: integer('im').notNull(),
+    co: integer('co').notNull(),
+    sh: integer('sh').notNull(),
+    pl: integer('pl').notNull(),
+    ri: integer('ri').notNull(),
+    me: integer('me').notNull(),
+    tw: integer('tw').notNull(),
+    cf: integer('cf').notNull(),
+    sp: integer('sp').notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
 });

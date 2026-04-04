@@ -105,6 +105,43 @@
 						</svg>
 					</div>
 				</a>
+
+                <!-- Belbin Form Link -->
+				<a
+					href="/belbin-form"
+					class="group block p-6 border border-gray-200 rounded-xl hover:bg-green-50 hover:border-green-300 transition-all cursor-pointer md:col-span-2"
+				>
+					<div class="flex items-center space-x-3 mb-3">
+						<div class="bg-green-100 p-2 rounded-lg text-green-600">
+							<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+						</div>
+						<h3 class="text-lg font-medium text-gray-900 group-hover:text-green-700">
+							Belbin Team Roles Survey
+						</h3>
+					</div>
+					<p class="text-sm text-gray-500">
+						Complete the Self-Perception Inventory for team role composition.
+					</p>
+					<div class="mt-4 flex items-center text-green-600 text-sm font-medium">
+						Open Survey
+						<svg
+							class="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M14 5l7 7m0 0l-7 7m7-7H3"
+							/>
+						</svg>
+					</div>
+				</a>
+
 			</div>
 
 			<div class="mt-8 border-t border-gray-200 pt-6">

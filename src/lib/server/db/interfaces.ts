@@ -61,3 +61,26 @@ export interface IForm2Repository {
     createSubmissions(submissions: NewForm2Submission[]): Promise<Form2Submission[]>;
     getPartDetailsByNumber(partNumber: string): Promise<Form2Submission | null>;
 }
+
+export interface BelbinSubmission {
+    id: number;
+    empNo: string;
+    empName: string;
+    im: number;
+    co: number;
+    sh: number;
+    pl: number;
+    ri: number;
+    me: number;
+    tw: number;
+    cf: number;
+    sp: number;
+    createdAt: Date;
+}
+
+export type NewBelbinSubmission = Omit<BelbinSubmission, 'id' | 'createdAt'>;
+
+export interface IBelbinRepository {
+    getSubmissions(): Promise<BelbinSubmission[]>;
+    createSubmission(submission: NewBelbinSubmission): Promise<BelbinSubmission>;
+}
