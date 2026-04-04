@@ -3,15 +3,15 @@
     import type { PageData } from './$types';
 
     let { data }: { data: PageData } = $props();
-    const { dropdownOptions } = data;
 
     interface Employee {
         no: string;
         name: string;
     }
-    const employees = (dropdownOptions['Employee'] || []) as unknown as Employee[];
-    const empNoOptions = employees.map((e) => e.no).filter(Boolean);
-    const empNameOptions = employees.map((e) => e.name).filter(Boolean);
+
+    let employees = $derived((data.dropdownOptions['Employee'] || []) as unknown as Employee[]);
+    let empNoOptions = $derived(employees.map((e) => e.no).filter(Boolean));
+    let empNameOptions = $derived(employees.map((e) => e.name).filter(Boolean));
 
     let empNo = $state('');
     let empName = $state('');
