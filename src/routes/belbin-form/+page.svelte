@@ -18,6 +18,8 @@
     let isSubmitting = $state(false);
     let errorMessage = $state('');
     let successMessage = $state('');
+    
+    let currentStep = $state(0);
 
     function onEmpNoChange() {
         if (empNo) {
@@ -59,6 +61,40 @@
 
     // Check if form is ready to submit
     let canSubmit = $derived(empNo.trim() !== '' && empName.trim() !== '' && allSectionsValid);
+
+    let isNextDisabled = $derived.by(() => {
+        if (currentStep === 0) return empNo.trim() === '' || empName.trim() === '';
+        if (currentStep >= 1 && currentStep <= 7) return sectionSums[currentStep - 1] !== 10;
+        return false;
+    });
+
+    function nextStep() {
+        if (!isNextDisabled && currentStep < 7) {
+            currentStep++;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function prevStep() {
+        if (currentStep > 0) {
+            currentStep--;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function updateScore(sectionIndex: number, questionKey: string, delta: number) {
+        const currentVal = Number((sections[sectionIndex] as any)[questionKey]) || 0;
+        let newVal = currentVal + delta;
+        if (newVal < 0) newVal = 0;
+        
+        const currentSum = sectionSums[sectionIndex];
+        if (delta > 0 && currentSum >= 10) return;
+        if (delta > 0 && currentSum + delta > 10) {
+            newVal = currentVal + (10 - currentSum);
+        }
+        
+        (sections[sectionIndex] as any)[questionKey] = newVal === 0 ? '' : newVal;
+    }
 
     const BELBIN_SECTIONS = [
         {
@@ -200,7 +236,7 @@
                 throw new Error(data.error || 'Failed to submit the form');
             }
 
-            successMessage = 'Self-Perception Inventory submitted successfully!';
+            successMessage = 'Form submitted successfully!';
             setTimeout(() => {
                 goto('/admin/belbin');
             }, 2000);
@@ -214,7 +250,7 @@
 </script>
 
 <svelte:head>
-    <title>Belbin Team Roles - Self-Perception Inventory</title>
+    <title>Belbin Team Roles</title>
 </svelte:head>
 
 <div class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">
@@ -229,6 +265,12 @@
         </div>
 
         <div class="bg-white shadow-xl rounded-2xl overflow-hidden mb-8 border border-gray-100">
+            <!-- Progress Bar -->
+            <div class="bg-gray-100 h-2 w-full">
+                <div class="bg-blue-500 h-2 transition-all duration-300" style="width: {currentStep === 0 ? 5 : (currentStep / 7) * 100}%"></div>
+            </div>
+
+            {#if currentStep === 0}
             <div class="p-6 sm:p-8 bg-blue-50 border-b border-blue-100">
                 <h3 class="text-xl font-bold text-blue-800 mb-4">Employee Information</h3>
                 <div class="grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-2">
@@ -258,45 +300,58 @@
                     </div>
                 </div>
             </div>
-
+            {:else if currentStep >= 1 && currentStep <= 7}
+            {@const sectionIndex = currentStep - 1}
+            {@const section = sections[sectionIndex]}
             <div class="p-6 sm:p-8 space-y-12">
-                {#each sections as section, sectionIndex}
-                    <div class="relative bg-white rounded-xl border border-gray-200 shadow-sm p-6 transition-all duration-200 {sectionSums[sectionIndex] === 10 ? 'ring-2 ring-green-400 border-transparent' : sectionSums[sectionIndex] > 10 ? 'ring-2 ring-red-400 border-transparent' : ''}">
-                        
-                        <div class="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
-                            <h3 class="text-xl font-bold text-gray-900">{BELBIN_SECTIONS[sectionIndex].title}</h3>
-                            <div class="flex items-center gap-3">
-                                <span class="text-sm font-medium text-gray-500">Points allocated:</span>
-                                <span class="inline-flex items-center justify-center h-8 px-3 rounded-full text-sm font-bold {sectionSums[sectionIndex] === 10 ? 'bg-green-100 text-green-700' : sectionSums[sectionIndex] > 10 ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}">
-                                    {sectionSums[sectionIndex]} / 10
-                                </span>
-                            </div>
+                <div class="relative bg-white rounded-xl border border-gray-200 shadow-sm p-6 transition-all duration-200 {sectionSums[sectionIndex] === 10 ? 'ring-2 ring-green-400 border-transparent' : sectionSums[sectionIndex] > 10 ? 'ring-2 ring-red-400 border-transparent' : ''}">
+                    
+                    <div class="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
+                        <h3 class="text-xl font-bold text-gray-900">{BELBIN_SECTIONS[sectionIndex].title}</h3>
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm font-medium text-gray-500 hidden sm:inline">Points allocated:</span>
+                            <span class="inline-flex items-center justify-center h-8 px-3 rounded-full text-sm font-bold {sectionSums[sectionIndex] === 10 ? 'bg-green-100 text-green-700' : sectionSums[sectionIndex] > 10 ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}">
+                                {sectionSums[sectionIndex]} / 10
+                            </span>
                         </div>
-
-                        <div class="space-y-4">
-                            {#each questions as q}
-                                <div class="flex items-center gap-4 group hover:bg-gray-50 p-2 rounded-lg transition-colors">
-                                    <div class="w-16 flex-shrink-0">
-                                        <input type="number" min="0" max="10" bind:value={(section as any)[q]}
-                                            class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 text-center font-bold" 
-                                            placeholder="0">
-                                    </div>
-                                    <div class="flex-1 text-gray-700 group-hover:text-gray-900">
-                                        <span class="font-bold text-gray-400 mr-2 uppercase">{q}.</span> 
-                                        {(BELBIN_SECTIONS[sectionIndex].questions as any)[q]}
-                                    </div>
-                                </div>
-                            {/each}
-                        </div>
-
-                        {#if sectionSums[sectionIndex] > 10}
-                            <p class="mt-4 text-sm text-red-600 font-medium">You have allocated more than 10 points. Please reduce some scores.</p>
-                        {:else if sectionSums[sectionIndex] < 10}
-                            <p class="mt-4 text-sm text-blue-600 font-medium">{10 - sectionSums[sectionIndex]} points remaining to be allocated.</p>
-                        {/if}
                     </div>
-                {/each}
+
+                    <div class="space-y-4">
+                        {#each questions as q}
+                            <div class="flex items-center gap-4 group hover:bg-gray-50 p-2 rounded-lg transition-colors">
+                                <div class="flex-shrink-0 flex items-center bg-gray-50 border border-gray-200 rounded-lg p-1">
+                                    <button 
+                                        type="button" 
+                                        class="w-8 h-8 rounded-md bg-white text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center font-bold text-lg shadow-sm"
+                                        disabled={Number((section as any)[q] || 0) <= 0}
+                                        onclick={() => updateScore(sectionIndex, q, -1)}
+                                    >-</button>
+                                    <input type="number" min="0" max="10" bind:value={(section as any)[q]}
+                                        class="block w-12 border-0 bg-transparent py-1 px-1 text-gray-900 focus:ring-0 sm:text-sm text-center font-bold" 
+                                        placeholder="0">
+                                    <button 
+                                        type="button" 
+                                        class="w-8 h-8 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center font-bold text-lg shadow-sm"
+                                        disabled={sectionSums[sectionIndex] >= 10 || Number((section as any)[q] || 0) >= 10}
+                                        onclick={() => updateScore(sectionIndex, q, 1)}
+                                    >+</button>
+                                </div>
+                                <div class="flex-1 text-gray-700 group-hover:text-gray-900 border-l border-gray-200 pl-4">
+                                    <span class="font-bold text-gray-400 mr-2 uppercase">{q}.</span> 
+                                    {(BELBIN_SECTIONS[sectionIndex].questions as any)[q]}
+                                </div>
+                            </div>
+                        {/each}
+                    </div>
+
+                    {#if sectionSums[sectionIndex] > 10}
+                        <p class="mt-4 text-sm text-red-600 font-medium">You have allocated more than 10 points. Please reduce some scores.</p>
+                    {:else if sectionSums[sectionIndex] < 10}
+                        <p class="mt-4 text-sm text-blue-600 font-medium">{10 - sectionSums[sectionIndex]} points remaining to be allocated for this section.</p>
+                    {/if}
+                </div>
             </div>
+            {/if}
 
             {#if errorMessage}
                 <div class="px-6 sm:px-8 py-4 bg-red-50 border-t border-red-200 text-red-700 text-sm font-medium text-center">
@@ -310,23 +365,46 @@
                 </div>
             {/if}
 
-            <div class="p-6 sm:p-8 bg-gray-50 border-t border-gray-200 flex justify-end">
-                <button 
-                    type="button" 
-                    onclick={handleSubmit} 
-                    disabled={!canSubmit || isSubmitting}
-                    class="inline-flex justify-center items-center rounded-xl bg-blue-600 px-8 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                    {#if isSubmitting}
-                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Submitting...
+            <div class="p-6 sm:p-8 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+                <div>
+                    <button 
+                        type="button" 
+                        onclick={prevStep} 
+                        disabled={currentStep === 0 || isSubmitting}
+                        class="inline-flex justify-center items-center rounded-xl bg-white border border-gray-300 px-6 py-3 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all {currentStep === 0 ? 'invisible' : ''}"
+                    >
+                        Previous
+                    </button>
+                </div>
+                <div>
+                    {#if currentStep < 7}
+                        <button 
+                            type="button" 
+                            onclick={nextStep} 
+                            disabled={isNextDisabled || isSubmitting}
+                            class="inline-flex justify-center items-center rounded-xl bg-blue-600 px-8 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none disabled:cursor-not-allowed transition-all"
+                        >
+                            Next
+                        </button>
                     {:else}
-                        Submit Inventory
+                        <button 
+                            type="button" 
+                            onclick={handleSubmit} 
+                            disabled={!canSubmit || isSubmitting}
+                            class="inline-flex justify-center items-center rounded-xl bg-blue-600 px-8 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:shadow-none disabled:cursor-not-allowed transition-all"
+                        >
+                            {#if isSubmitting}
+                                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Submitting...
+                            {:else}
+                                Submit
+                            {/if}
+                        </button>
                     {/if}
-                </button>
+                </div>
             </div>
         </div>
     </div>

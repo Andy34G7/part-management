@@ -83,4 +83,5 @@ export type NewBelbinSubmission = Omit<BelbinSubmission, 'id' | 'createdAt'>;
 export interface IBelbinRepository {
     getSubmissions(): Promise<BelbinSubmission[]>;
     createSubmission(submission: NewBelbinSubmission): Promise<BelbinSubmission>;
+    deleteSubmission(id: number): Promise<void>;
 }

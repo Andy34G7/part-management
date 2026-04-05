@@ -1,5 +1,5 @@
 import { belbinRepository } from '$lib/server/db';
-import type { PageServerLoad } from './$types';
+import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
     try {
@@ -12,5 +12,15 @@ export const load: PageServerLoad = async () => {
         return {
             submissions: []
         };
+    }
+};
+
+export const actions: Actions = {
+    delete: async ({ request }) => {
+        const formData = await request.formData();
+        const id = formData.get('id');
+        if (id) {
+            await belbinRepository.deleteSubmission(Number(id));
+        }
     }
 };

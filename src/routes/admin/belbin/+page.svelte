@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { enhance } from '$app/forms';
     export let data;
     
     interface RoleDef {
@@ -145,25 +146,21 @@
                             <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Primary Preference</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Secondary Preference</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tertiary Preference</th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Action</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         {#if processedSubmissions.length === 0}
                             <tr>
-                                <td colspan="4" class="px-6 py-8 text-center text-sm text-gray-500">No self-perception inventories submitted yet.</td>
+                                <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">No self-perception inventories submitted yet.</td>
                             </tr>
                         {:else}
                             {#each processedSubmissions as sub}
                                 <tr class="hover:bg-gray-50 transition-colors">
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="h-10 w-10 flex-shrink-0 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold">
-                                                {sub.empName.charAt(0).toUpperCase()}
-                                            </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-bold text-gray-900">{sub.empName}</div>
-                                                <div class="text-sm text-gray-500">{sub.empNo}</div>
-                                            </div>
+                                        <div class="flex flex-col">
+                                            <div class="text-sm font-bold text-gray-900">{sub.empName}</div>
+                                            <div class="text-sm text-gray-500">{sub.empNo}</div>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
@@ -180,6 +177,14 @@
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-gray-100 text-gray-700">
                                             {ROLES[sub.topRoles[2]].name}
                                         </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <form method="POST" action="?/delete" use:enhance>
+                                            <input type="hidden" name="id" value={sub.id} />
+                                            <button type="submit" class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-md transition-colors text-xs font-bold">
+                                                Revoke
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                             {/each}

@@ -97,4 +97,8 @@ export class PostgresBelbinRepository implements IBelbinRepository {
         const [result] = await db.insert(schema.belbinSubmissions).values(submission).returning();
         return result;
     }
+
+    async deleteSubmission(id: number): Promise<void> {
+        await db.delete(schema.belbinSubmissions).where(eq(schema.belbinSubmissions.id, id));
+    }
 }
